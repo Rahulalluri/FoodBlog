@@ -1,4 +1,3 @@
-using FoodBlog.App.JWTAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -7,13 +6,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TokenGeneration.Model;
+using TokenGeneration.Service;
 
-namespace FoodBlog.App
+namespace TokenGeneration
 {
     public class Startup
     {
@@ -27,45 +27,14 @@ namespace FoodBlog.App
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
             services.AddControllers();
 
-            //// configure strongly typed settings object
+            services.Configure<UserDetails>(Configuration.GetSection("UserDetails"));
             services.Configure<SecurityProfile>(Configuration.GetSection("Security"));
 
-            //// configure DI for application services
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITokenService, TokenService>();
 
-
-            // Register the Swagger generator, defining 1 or more Swagger documents
-            services.AddSwaggerGen(c => 
-            {
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme."
-                });
-
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
-                    }
-                });
-
-            });
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,7 +47,7 @@ namespace FoodBlog.App
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "FoodBlog API");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "TokenSceret API");
             });
 
             if (env.IsDevelopment())
@@ -90,17 +59,8 @@ namespace FoodBlog.App
 
             app.UseRouting();
 
-            // global cors policy
-            app.UseCors(x => x
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
-
             app.UseAuthentication();
             app.UseAuthorization();
-
-            // custom jwt auth middleware
-            app.UseMiddleware<JwtMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
