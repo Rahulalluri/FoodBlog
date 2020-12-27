@@ -42,8 +42,9 @@ namespace FoodBlog.App.JWTAuth
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
+                    ValidateIssuer = true,
                     ValidateAudience = false,
+                    ValidateLifetime = true,
                     // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
@@ -54,7 +55,7 @@ namespace FoodBlog.App.JWTAuth
                 // attach user to context on successful jwt validation
                 context.Items["User"] = userService.GetById(userId);
             }
-            catch
+            catch (Exception ex)
             {
                 throw new UnauthorizedAccessException(Errors.InvalidToken);
             }

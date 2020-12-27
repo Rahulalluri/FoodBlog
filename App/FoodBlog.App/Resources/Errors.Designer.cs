@@ -61,7 +61,7 @@ namespace FoodBlog.App.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Token was Invalid .
+        ///   Looks up a localized string similar to Token was Invalid or Token had expired.
         /// </summary>
         public static string InvalidToken {
             get {
