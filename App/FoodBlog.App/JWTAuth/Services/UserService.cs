@@ -19,7 +19,7 @@ namespace FoodBlog.App.Controller
         private List<User> _users = new List<User>
         {
             new User { Id = 1, FirstName = "Rahul", LastName = "Alluri", Username = "Rahul_Alluri", Password = "test123", 
-                Role = new UserRole("Adim", new List<string>(){ "CanAddUser", "CanDeleteUser"}) }
+                Role = new UserRole("Admin", new List<string>(){ "CanAddUser", "CanDeleteUser"}) }
         };
 
         private readonly SecurityProfile _appSettings;

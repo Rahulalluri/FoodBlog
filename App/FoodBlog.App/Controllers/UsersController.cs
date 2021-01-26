@@ -16,11 +16,11 @@ namespace FoodBlog.App.Controller
 
         private readonly User _loggedUser;
 
-        public UsersController(IUserService userService, HttpContext context)
+        public UsersController(IUserService userService, IHttpContextAccessor context)
         {
             _userService = userService;
 
-            _loggedUser = (User)context.Items["User"];
+            _loggedUser = (User)context.HttpContext.Items["User"];
         }
 
 
@@ -29,12 +29,13 @@ namespace FoodBlog.App.Controller
         [HttpGet]
         public IActionResult GetAll()
         {
+            IEnumerable<User> users = new List<User>();
             if (_loggedUser.Role.Operations.TryGetValue("Admin", out IEnumerable<string> operations) && operations.Any())
             {
-                var users = _userService.GetAll();
+                 users = _userService.GetAll();
             }
             
-            return Ok();
+            return Ok(users);
         }
 
         [Authorize]
