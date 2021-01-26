@@ -1,15 +1,18 @@
-﻿using FoodBlog.App.Resources;
+﻿using Connector.Model;
+using FoodBlog.App.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SecurityProfile = Connector.Model.SecurityProfile;
 
-namespace FoodBlog.App.JWTAuth
+namespace FoodBlog.App.Controller
 {
     public class JwtMiddleware
     {
@@ -43,14 +46,18 @@ namespace FoodBlog.App.JWTAuth
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidateAudience = false,
+                    ValidateAudience = true,
                     ValidateLifetime = true,
                     // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
+
+                    ValidIssuer = _security.Issuer,
+                    ValidAudience = _security.Audience,
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var roles = JsonConvert.DeserializeObject(jwtToken.Claims.First(x => x.Type == nameof(User.Role)).Value);
 
                 // attach user to context on successful jwt validation
                 context.Items["User"] = userService.GetById(userId);

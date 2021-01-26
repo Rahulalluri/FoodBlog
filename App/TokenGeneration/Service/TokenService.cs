@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Connector.Model;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TokenGeneration.Model;
 using TokenGeneration.Resources;
+using SecurityProfile = Connector.Model.SecurityProfile;
 
 namespace TokenGeneration.Service
 {
@@ -21,7 +24,8 @@ namespace TokenGeneration.Service
 
         private List<User> _users = new List<User>
         {
-            new User { Id = 1, FirstName = "Rahul", LastName = "Alluri", Username = "Rahul_Alluri", Password = "test123" }
+            new User { Id = 1, FirstName = "Rahul", LastName = "Alluri", Username = "Rahul_Alluri", Password = "test123",
+            Role = new UserRole("Adim", new List<string>(){ "CanAddUser", "CanDeleteUser"})}
         };
 
         public TokenService(IOptions<UserDetails> options, IOptions<SecurityProfile> securityProfile)
@@ -88,7 +92,10 @@ namespace TokenGeneration.Service
             var key = Encoding.ASCII.GetBytes(_securityProfile.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+                Audience = _securityProfile.Audience,
+                Issuer = _securityProfile.Issuer,
+                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()), new Claim(nameof(user.Role), 
+                JsonConvert.SerializeObject(user.Role)) }),
                 Expires = DateTime.UtcNow.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

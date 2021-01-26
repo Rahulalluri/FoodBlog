@@ -1,4 +1,5 @@
-using FoodBlog.App.JWTAuth;
+using FoodBlog.App.Controller;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -7,11 +8,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using SecurityProfile = Connector.Model.SecurityProfile;
 
 namespace FoodBlog.App
 {
@@ -36,6 +40,7 @@ namespace FoodBlog.App
             //// configure DI for application services
             services.AddScoped<IUserService, UserService>();
 
+            
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c => 
